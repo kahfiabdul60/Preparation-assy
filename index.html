@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Manajemen Produksi Preparation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-main: #fefce8;
+            --surface: #ffffff;
+            --primary: #d97706;
+            --primary-light: #fef3c7;
+            --primary-dark: #b45309;
+            --text-dark: #1e293b;
+            --border-color: #fef08a;
+            --border-card: #fde047;
+            --accent-green: #15803d;
+            --accent-red: #b91c1c;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--surface);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(217, 119, 6, 0.05);
+        }
+
+        .header-title { 
+            font-size: 16px; 
+            font-weight: 700; 
+            color: var(--primary-dark); 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-date { font-size: 11px; color: #a16207; font-weight: 600; }
+
+        main {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .tab-content { display: none; flex-direction: column; gap: 12px; }
+        .tab-content.active { display: flex; }
+
+        #printable-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--bg-main);
+            padding: 2px;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .card-list {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border-card);
+            overflow: hidden;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .card-list-header {
+            padding: 12px;
+            background: #fffbeb;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-list-title { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .team-input-container {
+            padding: 10px 12px;
+            background: #fffdf0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .team-input-container label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            white-space: nowrap;
+        }
+
+        .team-input-field {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            border: 1px solid var(--border-card);
+            border-radius: 6px;
+            background: var(--surface);
+            outline: none;
+        }
+
+        .item-card {
+            padding: 12px;
+            border-bottom: 1px solid #fef9c3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info { display: flex; flex-direction: column; gap: 2px; }
+        .item-title { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+        .item-sub { font-size: 11px; color: #854d0e; }
+
+        .operator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 12px;
+            width: 100%;
+        }
+
+        .op-box {
+            background: #fefce8;
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .op-pos { font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 2px; }
+        
+        .op-name-input {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+        }
+
+        .tracking-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .tracking-table th {
+            background: #fef9c3;
+            color: #713f12;
+            padding: 8px;
+            text-align: center;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tracking-table td {
+            padding: 8px 4px;
+            border-bottom: 1px solid #fef9c3;
+            text-align: center;
+        }
+
+        .tracking-table tr.break-row {
+            background: #fff3c4;
+            color: #b45309;
+        }
+
+        .tracking-table tr.downtime-row {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .input-actual {
+            width: 60px;
+            padding: 5px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--border-card);
+            border-radius: 6px;
+            outline: none;
+            background: #fffde7;
+        }
+
+        .input-actual:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 999px;
+        }
+        .badge-amber { background: #fef3c7; color: #b45309; }
+        .badge-gray { background: #fef9c3; color: #713f12; }
+        .badge-red { background: #fee2e2; color: #b91c1c; }
+
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+        
+        .status-achievement {
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .status-ok { color: var(--accent-green); }
+        .status-warning { color: #d97706; }
+        .status-danger { color: var(--accent-red); }
+
+        .btn-add {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-export {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            box-shadow: 0 4px 6px rgba(217, 119, 6, 0.2);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 60px;
+            background: var(--surface);
+            border-top: 1px solid var(--border-card);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: #a16207;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 33.3%;
+        }
+
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(120, 53, 15, 0.4);
+            display: none;
+            align-items: flex-end;
+            z-index: 9999;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-sheet {
+            background: var(--surface);
+            width: 100%;
+            border-radius: 16px 16px 0 0;
+            padding: 20px 16px 24px 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-title { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+        .btn-close { background: none; border: none; font-size: 20px; color: #a16207; cursor: pointer; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 600; color: #854d0e; margin-bottom: 4px; }
+        .form-control { width: 100%; padding: 10px; font-size: 13px; border: 1px solid var(--border-card); border-radius: 8px; background: #fffde7; }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .icon-svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: inline-block; vertical-align: middle; }
+
+        @media (min-width: 640px) {
+            body { align-items: center; justify-content: center; background: #fef3c7; }
+            .app-container {
+                width: 390px; height: 844px;
+                background: var(--bg-main); border-radius: 30px;
+                overflow: hidden; position: relative;
+                display: flex; flex-direction: column;
+                box-shadow: 0 10px 25px rgba(217, 119, 6, 0.15);
+            }
+            .bottom-nav { position: absolute; }
+            .modal-overlay { position: absolute; }
+        }
+        
+        @media (max-width: 400px) {
+            .operator-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" style="width: 100%; height: 100%; display: flex; flex-direction: column;">
+        <header>
+            <div class="header-title" id="page-title">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Laporan Hasil Produksi Preparation 
+            </div>
+            <div class="header-date" id="current-date">--/--/----</div>
+        </header>
+
+        <main>
+            <!-- TAB 1: LAPORAN -->
+            <section id="view-laporan" class="tab-content active">
+                <div id="printable-area">
+                    <!-- 1. TIM & OPERATOR -->
+                    <div class="card-list">
+                        <div class="card-list-header">
+                            <div class="card-list-title">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                Tim & Anggota Operator (8 Pos)
+                            </div>
+                            <span class="badge badge-gray">Ketik di kotak</span>
+                        </div>
+                        <div class="team-input-container">
+                            <label>Nama Tim / Grup:</label>
+                            <input type="text" id="nama-tim-input" class="team-input-field" value="Tim D" placeholder="Contoh: Tim D / Grup A" onchange="simpanNamaTim(this.value)">
+                        </div>
+                        <div class="operator-grid" id="operator-team-container"></div>
+                    </div>
+                    
+                    <!-- 2. REKAP MATERIAL -->
+                    <div class="card-list">
+                        <div class="card-list-header">
+                            <div class="card-list-title">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                Rekapitulasi Setiap Material
+                            </div>
+                        </div>
+                        <div id="rekap-material-container"></div>
+                    </div>
+
+                    <!-- 3. TABEL TRACKING HASIL PER JAM -->
+                    <div class="card-list">
+                        <div class="card-list-header">
+                            <div class="card-list-title">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 16 14"></polyline></svg>
+                                Catatan Hasil Setiap Jam & Kendala
+                            </div>
+                            <button class="btn-add" onclick="openTambahDowntimeModal()">+ Tambah Downtime</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="tracking-table">
+                                <thead>
+                                    <tr>
+                                        <th>Jam & Material</th>
+                                        <th>Target</th>
+                                        <th>Aktual</th>
+                                        <th>Selisih (Diff)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tracking-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-export" onclick="exportToPDF()">
+                    <svg class="icon-svg" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Simpan Lembar Laporan (PDF)
+                </button>
+            </section>
+
+            <!-- TAB 2: PLANNING -->
+            <section id="view-planning" class="tab-content">
+                <div class="card-list">
+                    <div class="card-list-header">
+                        <div class="card-list-title">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            Pengaturan Produksi & Jam Kerja
+                        </div>
+                    </div>
+                    <div style="padding:12px;">
+                        <div class="form-group">
+                            <label>Shift Kerja</label>
+                            <select id="produksi-shift" class="form-control" onchange="simpanPengaturanUmum()">
+                                <option value="Shift 1">Shift 1</option>
+                                <option value="Shift 2">Shift 2</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div>
+                                <label>Mulai Kerja</label>
+                                <input type="time" id="produksi-mulai" class="form-control" value="06:00" onchange="simpanPengaturanUmum()">
+                            </div>
+                            <div>
+                                <label>Selesai Kerja</label>
+                                <input type="time" id="produksi-selesai" class="form-control" value="14:00" onchange="simpanPengaturanUmum()">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div>
+                                <label>Mulai Istirahat</label>
+                                <input type="time" id="istirahat-mulai" class="form-control" value="12:00" onchange="simpanPengaturanUmum()">
+                            </div>
+                            <div>
+                                <label>Selesai Istirahat</label>
+                                <input type="time" id="istirahat-selesai" class="form-control" value="13:00" onchange="simpanPengaturanUmum()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-list">
+                    <div class="card-list-header">
+                        <div class="card-list-title">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Jadwal Rencana Produksi
+                        </div>
+                        <button class="btn-add" onclick="openTambahPlanningModal()">+ Rencana Baru</button>
+                    </div>
+                    <div id="planning-container"></div>
+                </div>
+            </section>
+
+            <!-- TAB 3: MATERIAL -->
+            <section id="view-material" class="tab-content">
+                <div class="card-list">
+                    <div class="card-list-header">
+                        <div class="card-list-title">
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 8.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5"></path><path d="M21 8.5 12 3 3 8.5"></path><path d="M12 12v9"></path></svg>
+                            Daftar Material
+                        </div>
+                        <button class="btn-add" onclick="openTambahMaterialModal()">+ Tambah Material</button>
+                    </div>
+                    <div id="material-container"></div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button onclick="showTab('laporan')" id="nav-laporan" class="nav-item active">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                <span>Laporan</span>
+            </button>
+            <button onclick="showTab('planning')" id="nav-planning" class="nav-item">
+                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Rencana</span>
+            </button>
+            <button onclick="showTab('material')" id="nav-material" class="nav-item">
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                <span>Material</span>
+            </button>
+        </nav>
+
+        <!-- MODAL FORM PLANNING -->
+        <div class="modal-overlay" id="modal-planning">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <span class="modal-title" id="modal-planning-title">Tambah Jadwal Rencana</span>
+                    <button class="btn-close" onclick="closeModal('modal-planning')">&times;</button>
+                </div>
+                <form onsubmit="simpanPlanning(event)">
+                    <div class="form-group">
+                        <label>Cari & Pilih Material</label>
+                        <input type="text" id="plan-search" class="form-control" placeholder="Ketik nama / kode material..." oninput="filterMaterialDropdown()" style="margin-bottom: 6px;">
+                        <select id="plan-nama" class="form-control" onchange="pilihMaterial()" required size="5" style="height: 120px;">
+                            <option value="">-- Pilih Material --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div>
+                            <label>Target Harian (ea)</label>
+                            <input type="number" id="plan-target-total" class="form-control" value="400" required>
+                        </div>
+                        <div>
+                            <label>STD / Jam (ea)</label>
+                            <input type="number" id="plan-std" class="form-control" required>
+                        </div>
+                    </div>                      
+
+                    <button type="submit" class="btn-submit">Simpan & Terapkan ke Laporan</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL FORM DOWNTIME / KENDALA -->
+        <div class="modal-overlay" id="modal-downtime">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <span class="modal-title">Catat Downtime / Kendala</span>
+                    <button class="btn-close" onclick="closeModal('modal-downtime')">&times;</button>
+                </div>
+                <form onsubmit="simpanDowntime(event)">
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div>
+                            <label>Mulai Kendala</label>
+                            <input type="time" id="dt-mulai" class="form-control" value="08:40" required>
+                        </div>
+                        <div>
+                            <label>Selesai Kendala</label>
+                            <input type="time" id="dt-selesai" class="form-control" value="08:50" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pos / Lokasi Terkendala</label>
+                        <input type="text" id="dt-pos" class="form-control" placeholder="Contoh: Pos 5" value="Pos 5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan Kendala</label>
+                        <input type="text" id="dt-keterangan" class="form-control" placeholder="Contoh: Keterlambatan material" value="Keterlambatan material" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Tambahkan ke Laporan</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL FORM MATERIAL -->
+        <div class="modal-overlay" id="modal-material">
+            <div class="modal-sheet">
+                <div class="modal-header">
+                    <span class="modal-title" id="modal-material-title">Tambah Material</span>
+                    <button class="btn-close" onclick="closeModal('modal-material')">&times;</button>
+                </div>
+                <div class="form-group">
+                    <label>Kode Material</label>
+                    <input id="mat-kode" class="form-control" placeholder="KE-XXXXXX-XXX">
+                </div>
+                <div class="form-group">
+                    <label>Nama Material</label>
+                    <input id="mat-nama" class="form-control" placeholder="Contoh: Mechanical Chamber">   
+                </div>
+                <div class="form-group">
+                    <label>STD / Jam</label>
+                    <input id="mat-std" type="number" class="form-control" placeholder="100">
+                </div>
+                <button class="btn-submit" onclick="simpanMaterial()">Simpan Material</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        let editMaterialIndex = -1;
+        let editPlanningIndex = -1;
+
+        let defaultMaterial = [
+            { kode: "KE-000747-10A", nama: "BOTTOM ASSY SCP RB3 WHITE M115 (M02)", std: 100 },
+            { kode: "XE-000815-00B", nama: "BOTTOM ASSY BLACK SCN RBC", std: 100 },
+            { kode: "NK-147069-BAD00A", nama: "TOP PNL RDA HF381 W/STKPRM500+SAKLAR(H)", std: 100 },
+            { kode: "NK-147069-BAD00B", nama: "TOP PNL RDA HF381 W/STKPRM615+SAKLAR(H)", std: 100 },
+            { kode: "KE-010029-00A", nama: "HEADPIECE KIT SCP RBC ASSY", std: 100 },
+            { kode: "KE-010029-0CF", nama: "HEADPIECE WITH ACCESSORIES ASSY R90", std: 100 },
+            { kode: "KE-010029-00G", nama: "HEADPIECE WITH ACCESSORIES 2 ASSY R90", std: 100 },
+            { kode: "KE-010029-01G", nama: "HEADPIECE W/ACCESSORIES 2 ASSY R90 RED", std: 100 },
+            { kode: "KE-010033-00A", nama: "HEADPIECE KIT SCP RBE ASSY", std: 100 },
+            { kode: "KE-010086-00A", nama: "HEADPIECE WITH ACCESSORIES ASSY R98(GRY)", std: 100 },
+            { kode: "KE-010087-00A", nama: "HEADPIECE WITH ACCESSORIES ASSY R99(GRY)", std: 100 },
+            { kode: "KE-010117-00A", nama: "HEADPIECE WITH ACCESS. ASSY R90 GRY M143", std: 100 },
+            { kode: "KE-000683-00B", nama: "INNER FAN FOR SCN W WPF1B-EX WHT M115", std: 100 },
+            { kode: "KE-000683-00C", nama: "INNER FAN SCN W GNF141 WHT M115 RB3 ER L", std: 100 },
+            { kode: "KE-000684-00C", nama: "INNER FAN SCN230 W/GNF142 WHT M115 ER L", std: 100 },
+            { kode: "KE-000553-00A", nama: "HOUSING FOR KEY ASSY 3X", std: 100 },
+            { kode: "KE-000802-00A", nama: "COVER FOR FAN, LED & ROCKER SWITCH", std: 100 },
+            { kode: "KE-000886-00A", nama: "MECHANICAL CHAMBER 2 R90 ASSY", std: 115 },
+            { kode: "KE-000886-00C", nama: "MECHANICAL CHAMBER R90 ASSY W/ALMN FOIL", std: 115 },
+            { kode: "KE-000681-00F", nama: "MULTIFLOW R9C ASSY", std: 100 },
+            { kode: "KE-000681-00H", nama: "RF MULTI FLOW ASSY R90", std: 100 },
+            { kode: "KE-000834-00A", nama: "MULTIFLOW R93 ASSY", std: 100 },
+            { kode: "KE-020043-00B", nama: "SAFETY DEVICE ASSY PAW", std: 100 },
+            { kode: "KE-000766-00A", nama: "MULTIFLOW R76 ASSY", std: 100 },
+            { kode: "KE-000767-00A", nama: "MECHANICAL CHAMBER R76 W/ALL FOIL", std: 100 },
+            { kode: "KE-000768-00A", nama: "CHRISPER ASSY R76", std: 70 },
+            { kode: "KE-000799-00A", nama: "V-CHILLER COMPARTEMENT ASSY R76", std: 100 },
+            { kode: "KE-010012-00A", nama: "INNER FAN ASSY SCN RBE", std: 100 },
+            { kode: "KE-010013-00B", nama: "BOX MODUL HOBA-045 RBE", std: 100 },
+            { kode: "KE-010059-00A", nama: "DISPLAY KIT ASSY SCP RBE", std: 100 },
+            { kode: "KE-000618-00A", nama: "UNIVERSAL BOX 2 V 0 ASSYS0N180L ST", std: 100 },
+            { kode: "KE-000804-00A", nama: "UNIVERSAL BOX ASSY RBE", std: 100 },
+            { kode: "KE-000837-00B", nama: "UNIVERSAL BOX ASSY R93 M01", std: 100 },
+            { kode: "KE-020035-00B", nama: "WATER INLET ASSY WM WIN GREY", std: 100 },
+            { kode: "KE-020035-00C", nama: "WATER INLET ASSY WM WIN BLUE", std: 100 },
+            { kode: "KE-020029-00A", nama: "WATER INLET ASSY WM WI1 MAROON", std: 100 },
+            { kode: "KE-020030-00A", nama: "WATER INLET ASSY WM WI1 BLUE M145", std: 100 },
+            { kode: "KE-020035-00A", nama: "WATER INLET ASSY WM W1M GREEN", std: 100 },
+            { kode: "KE-020035-00B", nama: "WATER INLET ASSY WM W1M BLACK", std: 100 },
+            { kode: "KE-020049-01A", nama: "WATER INLET ASSY WM W1K VIOLET", std: 100 },
+            { kode: "KE-010102-00A", nama: "WATER TRAY ASSY R97", std: 100 },
+            { kode: "KE-010103-00A", nama: "WATER TRAY ASSY R93", std: 100 },
+            { kode: "KE-010104-00A", nama: "WATER TRAY ASSY R76", std: 100 }
+        ];
+
+        let dataMaterial = JSON.parse(localStorage.getItem("material")) || defaultMaterial;
+
+        let dataPlanning = JSON.parse(localStorage.getItem("planning")) || [
+            { nama: "MECHANICAL CHAMBER 2 R90 ASSY", targetTotal: 419, stdJam: 115 },
+            { nama: "CHRISPER ASSY R76", targetTotal: 140, stdJam: 70 }
+        ];
+
+        let dataDowntime = JSON.parse(localStorage.getItem("downtime")) || [
+            { mulai: "08:40", selesai: "08:50", pos: "Pos 5", keterangan: "Keterlambatan material" }
+        ];
+
+        let pengaturanUmum = JSON.parse(localStorage.getItem("pengaturanUmum")) || {
+            shift: "Shift 1",
+            jamMulai: "06:00",
+            jamSelesai: "14:00",
+            istMulai: "12:00",
+            istSelesai: "13:00"
+        };
+
+        let namaTimGudang = localStorage.getItem("namaTimGudang") || "Tim D";
+
+        let savedOperator = JSON.parse(localStorage.getItem("operator"));
+        let defaultOperator = [];
+        for (let i = 1; i <= 8; i++) {
+            let namaVal = (savedOperator && savedOperator[i-1]) ? (typeof savedOperator[i-1] === 'object' ? savedOperator[i-1].nama : savedOperator[i-1]) : `Operator ${i}`;
+            defaultOperator.push(namaVal);
+        }
+        let dataOperator = defaultOperator;
+
+        const today = new Date();
+        document.getElementById('current-date').innerText = today.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(`view-${tabName}`).classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function ubahMenit(jam) {
+            if (!jam || !jam.includes(":")) return 0;
+            let data = jam.split(":");
+            return (parseInt(data[0]) * 60 + parseInt(data[1]));
+        }
+
+        function menitKeJam(menit) {
+            let h = Math.floor(menit / 60) % 24;
+            let m = Math.round(menit % 60);
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        }
+
+        function simpanPengaturanUmum() {
+            pengaturanUmum = {
+                shift: document.getElementById("produksi-shift").value,
+                jamMulai: document.getElementById("produksi-mulai").value,
+                jamSelesai: document.getElementById("produksi-selesai").value,
+                istMulai: document.getElementById("istirahat-mulai").value,
+                istSelesai: document.getElementById("istirahat-selesai").value
+            };
+            localStorage.setItem("pengaturanUmum", JSON.stringify(pengaturanUmum));
+            hitungUrutanProduksi();
+            loadLaporanPlanning();
+        }
+
+        function loadPengaturanUmum() {
+            document.getElementById("produksi-shift").value = pengaturanUmum.shift;
+            document.getElementById("produksi-mulai").value = pengaturanUmum.jamMulai;
+            document.getElementById("produksi-selesai").value = pengaturanUmum.jamSelesai;
+            document.getElementById("istirahat-mulai").value = pengaturanUmum.istMulai;
+            document.getElementById("istirahat-selesai").value = pengaturanUmum.istSelesai;
+            document.getElementById("nama-tim-input").value = namaTimGudang;
+        }
+
+        function simpanNamaTim(val) {
+            namaTimGudang = val;
+            localStorage.setItem("namaTimGudang", namaTimGudang);
+        }
+
+        function tampilOperator(){
+            const opContainer = document.getElementById('operator-team-container');
+            opContainer.innerHTML = "";
+
+            dataOperator.forEach(function(nama, index){
+                opContainer.innerHTML += `
+                <div class="op-box">
+                    <div class="op-pos">POS ${index+1}</div>
+                    <input class="op-name-input" value="${nama}" placeholder="Nama Operator" onchange="ubahOperator(${index}, this.value)">
+                </div>`;
+            });
+        }
+
+        function ubahOperator(index, nama){
+            dataOperator[index] = nama;
+            localStorage.setItem("operator", JSON.stringify(dataOperator));
+        }
+
+        function hitungUrutanProduksi(){
+            let jamSekarang = ubahMenit(pengaturanUmum.jamMulai);
+            let batasSelesai = ubahMenit(pengaturanUmum.jamSelesai);
+            let breakMulai = ubahMenit(pengaturanUmum.istMulai);
+            let breakSelesai = ubahMenit(pengaturanUmum.istSelesai);
+
+            if(batasSelesai <= jamSekarang) batasSelesai += 1440;
+
+            dataPlanning.forEach(function(item){
+                item.jamMulai = menitKeJam(jamSekarang);
+                let durasiMenit = (item.targetTotal / item.stdJam) * 60;
+                
+                let waktuSelesai = jamSekarang + durasiMenit;
+
+                if (breakMulai > 0 && breakSelesai > breakMulai) {
+                    if (jamSekarang < breakMulai && waktuSelesai > breakMulai) {
+                        waktuSelesai += (breakSelesai - breakMulai);
+                    }
+                }
+
+                item.jamSelesai = menitKeJam(waktuSelesai);
+
+                if(waktuSelesai > batasSelesai){
+                    item.status = "⚠️ Melebihi jam kerja";
+                } else {
+                    item.status = "Aman (OK)";
+                }
+
+                jamSekarang = waktuSelesai;
+            });
+
+            localStorage.setItem("planning", JSON.stringify(dataPlanning));
+            tampilPlanning();
+        }
+
+        function openTambahDowntimeModal() {
+            openModal("modal-downtime");
+        }
+
+        function simpanDowntime(e) {
+            e.preventDefault();
+            let mulai = document.getElementById("dt-mulai").value;
+            let selesai = document.getElementById("dt-selesai").value;
+            let pos = document.getElementById("dt-pos").value;
+            let keterangan = document.getElementById("dt-keterangan").value;
+
+            dataDowntime.push({ mulai, selesai, pos, keterangan });
+            localStorage.setItem("downtime", JSON.stringify(dataDowntime));
+            closeModal("modal-downtime");
+            loadLaporanPlanning();
+        }
+
+        function hapusDowntime(index) {
+            if(confirm("Hapus catatan downtime ini?")) {
+                dataDowntime.splice(index, 1);
+                localStorage.setItem("downtime", JSON.stringify(dataDowntime));
+                loadLaporanPlanning();
+            }
+        }
+
+        function loadLaporanPlanning(){
+            const tbody = document.getElementById("tracking-tbody");
+            tbody.innerHTML = "";
+
+            if(dataPlanning.length === 0){
+                hitungTotalOutput();
+                return;
+            }
+
+            let dataAktual = JSON.parse(localStorage.getItem("trackingAktual")) || [];
+            let currentPlanIndex = 0;
+
+            let kerjaMulai = ubahMenit(pengaturanUmum.jamMulai);
+            let kerjaSelesai = ubahMenit(pengaturanUmum.jamSelesai);
+            let breakMulai = ubahMenit(pengaturanUmum.istMulai);
+            let breakSelesai = ubahMenit(pengaturanUmum.istSelesai);
+
+            if(kerjaSelesai <= kerjaMulai) kerjaSelesai += 1440;
+
+            let curr = kerjaMulai;
+            let rowIndex = 0;
+            let planTargetSisa = dataPlanning[0] ? dataPlanning[0].targetTotal : 0;
+
+            let scheduledEvents = [];
+            if(breakMulai > 0 && breakSelesai > breakMulai) {
+                scheduledEvents.push({ start: breakMulai, end: breakSelesai, type: 'break' });
+            }
+            dataDowntime.forEach(dt => {
+                let mMin = ubahMenit(dt.mulai);
+                let sMin = ubahMenit(dt.selesai);
+                if(sMin > mMin) {
+                    scheduledEvents.push({ start: mMin, end: sMin, type: 'downtime', data: dt });
+                }
+            });
+            scheduledEvents.sort((a,b) => a.start - b.start);
+
+            while(curr < kerjaSelesai && currentPlanIndex < dataPlanning.length){
+                let plan = dataPlanning[currentPlanIndex];
+
+                let activeEvent = scheduledEvents.find(ev => curr >= ev.start && curr < ev.end);
+                if(activeEvent) {
+                    let tr = document.createElement("tr");
+                    if(activeEvent.type === 'break') {
+                        tr.className = "break-row";
+                        tr.innerHTML = `
+                            <td><strong>${menitKeJam(activeEvent.start)} - ${menitKeJam(activeEvent.end)}</strong></td>
+                            <td colspan="3"><span class="badge badge-amber">ISTIRAHAT</span></td>
+                        `;
+                    } else {
+                        tr.className = "downtime-row";
+                        let dtIdx = dataDowntime.findIndex(d => ubahMenit(d.mulai) === activeEvent.start);
+                        tr.innerHTML = `
+                            <td><strong>${menitKeJam(activeEvent.start)} - ${menitKeJam(activeEvent.end)}</strong></td>
+                            <td colspan="2" style="text-align: left; padding-left: 8px;">
+                                <span class="badge badge-red">⚠️ DOWNTIME (${activeEvent.data.pos})</span><br>
+                                <span style="font-size: 10px; font-weight: bold;">${activeEvent.data.keterangan}</span>
+                            </td>
+                            <td><button class="btn-add" style="background:#b91c1c; padding:2px 6px; font-size:9px;" onclick="hapusDowntime(${dtIdx})">Hapus</button></td>
+                        `;
+                    }
+                    tbody.appendChild(tr);
+                    curr = activeEvent.end;
+                    continue;
+                }
+
+                let nextBoundary = Math.min(Math.floor(curr / 60 + 1) * 60, kerjaSelesai);
+                
+                let nextEvent = scheduledEvents.find(ev => ev.start > curr && ev.start < nextBoundary);
+                if(nextEvent) {
+                    nextBoundary = nextEvent.start;
+                }
+
+                let menitButuhSisa = (planTargetSisa / plan.stdJam) * 60;
+                let estimasiSelesaiPlan = curr + menitButuhSisa;
+
+                let isMaterialFinished = false;
+                if(estimasiSelesaiPlan <= nextBoundary){
+                    nextBoundary = Math.round(estimasiSelesaiPlan);
+                    isMaterialFinished = true;
+                }
+
+                let durasiMenitSlot = nextBoundary - curr;
+                if (durasiMenitSlot <= 0) {
+                    curr++;
+                    continue;
+                }
+
+                let targetSlot = Math.round((plan.stdJam / 60) * durasiMenitSlot);
+                if (isMaterialFinished) {
+                    targetSlot = planTargetSisa;
+                }
+
+                planTargetSisa -= targetSlot;
+
+                let actualVal = (dataAktual[rowIndex] !== undefined && dataAktual[rowIndex] !== null) ? dataAktual[rowIndex] : 0;
+
+                let tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>
+                        <strong>${menitKeJam(curr)} - ${menitKeJam(nextBoundary)}</strong><br>
+                        <span class="badge badge-gray">${plan.nama}</span>
+                    </td>
+                    <td><strong>${targetSlot}</strong></td>
+                    <td>
+                        <input type="number" class="input-actual" value="${actualVal}" min="0" 
+                               data-target="${targetSlot}" data-material="${plan.nama}" 
+                               oninput="hitungTotalOutput()">
+                    </td>
+                    <td class="diff-val text-red">-${targetSlot}</td>
+                `;
+
+                tbody.appendChild(tr);
+                curr = nextBoundary;
+                rowIndex++;
+
+                if(isMaterialFinished || planTargetSisa <= 0){
+                    currentPlanIndex++;
+                    if(currentPlanIndex < dataPlanning.length){
+                        planTargetSisa = dataPlanning[currentPlanIndex].targetTotal;
+                    }
+                }
+            }
+
+            hitungTotalOutput();
+        }
+
+        function hitungTotalOutput() {
+            const rows = document.querySelectorAll('#tracking-tbody tr');
+            let dataAktual = [];
+
+            rows.forEach(row => {
+                const input = row.querySelector('.input-actual');
+                const diffTd = row.querySelector('.diff-val');
+
+                if (input) {
+                    let target = parseInt(input.getAttribute('data-target')) || 0;
+                    let actual = parseInt(input.value) || 0;
+                    dataAktual.push(actual);
+
+                    let diff = actual - target;
+                    diffTd.innerText = diff > 0 ? `+${diff}` : `${diff}`;
+                    diffTd.className = `diff-val ${diff >= 0 ? 'text-green' : 'text-red'}`;
+                }
+            });
+
+            localStorage.setItem("trackingAktual", JSON.stringify(dataAktual));
+            hitungRekapMaterial();
+        }
+
+        function hitungRekapMaterial(){
+            let container = document.getElementById("rekap-material-container");
+            if(!container) return;
+
+            container.innerHTML = "";
+            let rekap = {};
+
+            dataPlanning.forEach(plan => {
+                if(!rekap[plan.nama]){
+                    rekap[plan.nama] = { target: 0, actual: 0 };
+                }
+                rekap[plan.nama].target += Number(plan.targetTotal);
+            });
+
+            let inputs = document.querySelectorAll("#tracking-tbody .input-actual");
+            inputs.forEach(input => {
+                let namaMat = input.getAttribute("data-material");
+                let val = parseInt(input.value) || 0;
+                if(rekap[namaMat]){
+                    rekap[namaMat].actual += val;
+                }
+            });
+
+            Object.keys(rekap).forEach(nama => {
+                let item = rekap[nama];
+                let persen = item.target > 0 ? Math.round((item.actual / item.target) * 100) : 0;
+
+                let statusClass = "status-danger";
+                let statusText = "Belum Mencapai Target";
+
+                if(persen >= 100){
+                    statusClass = "status-ok";
+                    statusText = "Target Tercapai";
+                } else if(persen >= 90){
+                    statusClass = "status-warning";
+                    statusText = "Mendekati Target";
+                }
+
+                container.innerHTML += `
+                <div class="item-card">
+                    <div class="item-info">
+                        <span class="item-title">${nama}</span>
+                        <span class="item-sub">Target Rencana : ${item.target} ea</span>
+                        <span class="item-sub">Hasil Realisasi : ${item.actual} ea</span>
+                        <span class="status-achievement ${statusClass}">
+                            Capaian: ${persen}% (${statusText})
+                        </span>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function openTambahPlanningModal() {
+            editPlanningIndex = -1;
+            document.getElementById("modal-planning-title").innerText = "Tambah Jadwal Rencana";
+            document.getElementById("plan-search").value = "";
+            document.getElementById("plan-nama").value = "";
+            document.getElementById("plan-target-total").value = "400";
+            document.getElementById("plan-std").value = "";
+            loadMaterialPlanning();
+            openModal("modal-planning");
+        }
+
+        function filterMaterialDropdown() {
+            let keyword = document.getElementById("plan-search").value.toLowerCase();
+            let select = document.getElementById("plan-nama");
+            select.innerHTML = `<option value="">-- Pilih Material --</option>`;
+
+            dataMaterial.forEach(function(item, index){
+                let textGabung = (item.kode + " - " + item.nama).toLowerCase();
+                if(textGabung.includes(keyword)){
+                    select.innerHTML += `<option value="${index}">${item.kode} - ${item.nama}</option>`;
+                }
+            });
+        }
+
+        function pilihMaterial(){
+            let index = document.getElementById("plan-nama").value;
+            if(index === "") return;
+            let material = dataMaterial[index];
+            document.getElementById("plan-std").value = material.std;
+        }
+
+        function simpanPlanning(e){
+            e.preventDefault();
+            let indexMaterial = document.getElementById("plan-nama").value;
+            if(indexMaterial === ""){
+                alert("Pilih material terlebih dahulu!");
+                return;
+            }
+
+            let material = dataMaterial[indexMaterial];
+            let targetTotal = parseInt(document.getElementById("plan-target-total").value);
+            let stdJam = parseInt(document.getElementById("plan-std").value) || material.std;
+
+            let dataBaru = {
+                nama: material.nama,
+                targetTotal: targetTotal,
+                stdJam: stdJam
+            };
+
+            if(editPlanningIndex === -1){
+                dataPlanning.push(dataBaru);
+            } else {
+                dataPlanning[editPlanningIndex] = dataBaru;
+                editPlanningIndex = -1;
+            }
+
+            localStorage.removeItem("trackingAktual");
+            hitungUrutanProduksi();
+            loadLaporanPlanning();
+            closeModal("modal-planning");
+            showTab("laporan");
+        }
+
+        function editPlanning(index){
+            let item = dataPlanning[index];
+            editPlanningIndex = index;
+            document.getElementById("modal-planning-title").innerText = "Ubah Jadwal Rencana";
+            document.getElementById("plan-search").value = "";
+            loadMaterialPlanning();
+
+            dataMaterial.forEach((m, i) => {
+                if(m.nama === item.nama){
+                    document.getElementById("plan-nama").value = i;
+                }
+            });
+
+            document.getElementById("plan-target-total").value = item.targetTotal;
+            document.getElementById("plan-std").value = item.stdJam;
+
+            openModal("modal-planning");
+        }
+
+        function hapusPlanning(index){
+            if(confirm("Apakah Anda yakin ingin menghapus rencana ini?")){
+                dataPlanning.splice(index, 1);
+                localStorage.removeItem("trackingAktual");
+                hitungUrutanProduksi();
+                loadLaporanPlanning();
+            }
+        }
+
+        function tampilPlanning(){
+            let container = document.getElementById("planning-container");
+            container.innerHTML = "";
+
+            dataPlanning.forEach(function(item, index){
+                container.innerHTML += `
+                <div class="item-card">
+                    <div class="item-info">
+                        <span class="item-title">${index+1}. ${item.nama}</span>
+                        <span class="item-sub">Target : ${item.targetTotal} ea | STD: ${item.stdJam} ea/jam</span>
+                        <span class="item-sub">Perkiraan: ${item.jamMulai || '--:--'} - ${item.jamSelesai || '--:--'}</span>
+                        <span class="item-sub" style="color:${item.status == '⚠️ Melebihi jam kerja' ? '#b91c1c' : '#15803d'}; font-weight:700;">
+                            Status : ${item.status || "Aman (OK)"}
+                        </span>
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn-add" onclick="editPlanning(${index})">Ubah</button>
+                        <button class="btn-add" style="background:#b91c1c" onclick="hapusPlanning(${index})">Hapus</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function loadMaterialPlanning(){
+            let select = document.getElementById("plan-nama");
+            select.innerHTML = `<option value="">-- Pilih Material --</option>`;
+
+            dataMaterial.forEach(function(item, index){
+                select.innerHTML += `<option value="${index}">${item.kode} - ${item.nama}</option>`;
+            });
+        }
+
+        function openTambahMaterialModal() {
+            editMaterialIndex = -1;
+            document.getElementById("modal-material-title").innerText = "Tambah Material";
+            document.getElementById("mat-kode").value = "";
+            document.getElementById("mat-nama").value = "";
+            document.getElementById("mat-std").value = "";
+            openModal("modal-material");
+        }
+
+        function simpanMaterial(){
+            let kode = document.getElementById("mat-kode").value;
+            let nama = document.getElementById("mat-nama").value;
+            let std = parseInt(document.getElementById("mat-std").value);
+
+            if(kode==="" || nama==="" || !std){
+                alert("Data material belum lengkap!");
+                return;
+            }
+
+            if(editMaterialIndex === -1){
+                dataMaterial.push({ kode: kode, nama: nama, std: std });
+            } else {
+                dataMaterial[editMaterialIndex] = { kode: kode, nama: nama, std: std };
+                editMaterialIndex = -1;
+            }
+
+            localStorage.setItem("material", JSON.stringify(dataMaterial));
+            tampilMaterial();
+            loadMaterialPlanning();
+            closeModal("modal-material");
+        }
+
+        function editMaterial(index) {
+            let item = dataMaterial[index];
+            document.getElementById("modal-material-title").innerText = "Ubah Material";
+            document.getElementById("mat-kode").value = item.kode;
+            document.getElementById("mat-nama").value = item.nama;
+            document.getElementById("mat-std").value = item.std;
+
+            editMaterialIndex = index;
+            openModal("modal-material");
+        }
+
+        function hapusMaterial(index) {
+            if (confirm(`Apakah Anda yakin ingin menghapus material "${dataMaterial[index].nama}" ini?`)) {
+                dataMaterial.splice(index, 1);
+                localStorage.setItem("material", JSON.stringify(dataMaterial));
+                tampilMaterial();
+                loadMaterialPlanning();
+            }
+        }
+
+        function tampilMaterial(){
+            let container = document.getElementById("material-container");
+            container.innerHTML = "";
+
+            dataMaterial.forEach(function(item, index){
+                container.innerHTML += `
+                <div class="item-card">
+                    <div class="item-info">
+                        <span class="item-title">${item.nama}</span>
+                        <span class="item-sub">Kode : ${item.kode}</span>
+                        <span class="item-sub">STD : ${item.std} ea/jam</span>
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn-add" onclick="editMaterial(${index})">Ubah</button>
+                        <button class="btn-add" style="background:#b91c1c" onclick="hapusMaterial(${index})">Hapus</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function prepareOfficialReport() {
+            document.getElementById('rpt-date').innerText = document.getElementById('current-date').innerText;
+            document.getElementById('rpt-shift').innerText = pengaturanUmum.shift;
+            document.getElementById('rpt-jam-kerja').innerText = `${pengaturanUmum.jamMulai} - ${pengaturanUmum.jamSelesai} WIB`;
+            document.getElementById('rpt-jam-istirahat').innerText = `${pengaturanUmum.istMulai} - ${pengaturanUmum.istSelesai} WIB`;
+            document.getElementById('rpt-nama-tim').innerText = namaTimGudang;
+
+            let opTbody = document.getElementById('rpt-operator-tbody');
+            opTbody.innerHTML = '';
+            for (let i = 0; i < dataOperator.length; i += 2) {
+                let op1 = dataOperator[i] || '-';
+                let op2 = dataOperator[i + 1] || '';
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; font-weight: bold; background: #fefce8; color: #78350f; text-align: center;">POS ${i + 1}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; font-weight: bold;">${op1}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; font-weight: bold; background: #fefce8; color: #78350f; text-align: center;">${i + 2 <= dataOperator.length ? 'POS ' + (i + 2) : ''}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; font-weight: bold;">${op2}</td>
+                `;
+                opTbody.appendChild(tr);
+            }
+
+            let matTbody = document.getElementById('rpt-rekap-material-tbody');
+            matTbody.innerHTML = '';
+            let rekap = {};
+            dataPlanning.forEach(plan => {
+                if(!rekap[plan.nama]) rekap[plan.nama] = { target: 0, actual: 0 };
+                rekap[plan.nama].target += Number(plan.targetTotal);
+            });
+            let inputs = document.querySelectorAll("#tracking-tbody .input-actual");
+            inputs.forEach(input => {
+                let namaMat = input.getAttribute("data-material");
+                let val = parseInt(input.value) || 0;
+                if(rekap[namaMat]) rekap[namaMat].actual += val;
+            });
+
+            Object.keys(rekap).forEach(nama => {
+                let item = rekap[nama];
+                let persen = item.target > 0 ? Math.round((item.actual / item.target) * 100) : 0;
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; font-weight: bold;">${nama}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center;">${item.target} ea</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center;">${item.actual} ea</td>
+                    <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; font-weight: bold; color: ${persen >= 100 ? '#15803d' : (persen >= 90 ? '#d97706' : '#b91c1c')};">${persen}%</td>
+                `;
+                matTbody.appendChild(tr);
+            });
+
+            let trackTbody = document.getElementById('rpt-tracking-tbody');
+            trackTbody.innerHTML = '';
+            const mainRows = document.querySelectorAll('#tracking-tbody tr');
+            
+            mainRows.forEach(row => {
+                let tr = document.createElement('tr');
+                if (row.classList.contains('break-row')) {
+                    let jam = row.cells[0].innerText;
+                    tr.innerHTML = `
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; background: #fff3c4; font-weight: bold; color: #b45309;">${jam}</td>
+                        <td colspan="4" style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; background: #fff3c4; color: #b45309; font-weight: bold;">ISTIRAHAT</td>
+                    `;
+                } else if (row.classList.contains('downtime-row')) {
+                    let jam = row.cells[0].innerText;
+                    let desc = row.cells[1].innerText.replace('Hapus', '').trim();
+                    tr.innerHTML = `
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; background: #fef2f2; font-weight: bold; color: #b91c1c;">${jam}</td>
+                        <td colspan="4" style="padding: 6px 8px; border: 1px solid #fde047; background: #fef2f2; color: #b91c1c; font-weight: bold;">[DOWNTIME] ${desc}</td>
+                    `;
+                } else {
+                    let jamMat = row.cells[0].innerText.split('\n');
+                    let jam = jamMat[0] || '';
+                    let mat = jamMat[1] || '';
+                    let target = row.cells[1].innerText;
+                    let inputVal = row.querySelector('.input-actual') ? row.querySelector('.input-actual').value : '0';
+                    let diffTd = row.querySelector('.diff-val');
+                    let diffText = diffTd ? diffTd.innerText : '0';
+                    let diffColor = diffTd && diffTd.classList.contains('text-green') ? '#15803d' : '#b91c1c';
+
+                    tr.innerHTML = `
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center;">${jam}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #fde047;">${mat}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center;">${target}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; font-weight: bold;">${inputVal}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #fde047; text-align: center; font-weight: bold; color: ${diffColor};">${diffText}</td>
+                    `;
+                }
+                trackTbody.appendChild(tr);
+            });
+        }
+
+        function exportToPDF() {
+            prepareOfficialReport();
+            const element = document.getElementById('official-report-container');
+            const opt = {
+                margin:       10,
+                filename:     `Laporan_Resmi_Gudang_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        }
+
+        window.onload = function(){
+            loadPengaturanUmum();
+            tampilMaterial();
+            loadMaterialPlanning();
+            tampilOperator();
+            hitungUrutanProduksi();
+            loadLaporanPlanning();
+        }
+    </script>
+</body>
+</html>
